@@ -1,0 +1,86 @@
+plugins {
+    id 'groovy'
+    id 'org.graalvm.buildtools.native' version '0.10.4'
+    id 'org.springframework.boot' version '3.4.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.squacklabs'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+graalvmNative {
+    agent {
+        defaultMode = 'standard'
+    }
+    metadataRepository {
+        enabled = true
+    }
+    binaries {
+        main {
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(17)
+                vendor = JvmVendorSpec.matching("GraalVM")
+            }
+            richOutput = true
+            mainClass = 'com.squacklabs.squawk.SquawkApplication'
+            buildArgs.addAll(
+//                    '-H:IncludeSBOM=cyclonedx',
+                    '--report-unsupported-elements-at-runtime',
+//                    '--initialize-at-run-time=groovy.grape.GrapeIvy,org.h2.store.fs.niomem.FileNioMemData',
+                    '--initialize-at-build-time',
+                    '--no-fallback',
+            )
+        }
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
+}
+
+ext {
+    set('springAiVersion', "1.0.0-M4")
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+//    implementation 'org.springframework.boot:spring-boot-starter-groovy-templates'
+    implementation 'org.apache.groovy:groovy'
+    implementation 'org.springframework.ai:spring-ai-anthropic-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-ollama-spring-boot-starter'
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter'
+    implementation 'org.xerial:sqlite-jdbc'
+    implementation "org.komamitsu:spring-data-sqlite:1.3.0"
+    implementation 'javax.inject:javax.inject:1'
+    implementation 'org.hibernate.orm:hibernate-community-dialects:6.6.4.Final'
+    compileOnly 'org.projectlombok:lombok'
+//    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
