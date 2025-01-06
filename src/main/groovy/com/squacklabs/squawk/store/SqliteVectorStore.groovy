@@ -41,10 +41,14 @@ class SqliteVectorStore implements VectorStore {
             }
             stmt.executeBatch()
         }
+
+        Optional.of(
+            res.every { it  as int >= 0 }
+        )
     }
 
     @Override
     List<Document> similaritySearch(SearchRequest request) {
-
+        []
     }
 }

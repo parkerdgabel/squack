@@ -1,7 +1,9 @@
 package com.squacklabs.squawk.command
 
+import groovy.transform.CompileStatic
 import org.springframework.boot.ApplicationArguments
 
+@CompileStatic
 enum CommandResult {
     SUCCESS,
     FAILURE
@@ -11,9 +13,9 @@ enum CommandResult {
     CommandResult(String errorMessage = null) {
         this.errorMessage = errorMessage
     }
-
 }
 
+@CompileStatic
 class CommandContext {
     ApplicationArguments args
     CommandResult result
@@ -29,7 +31,7 @@ class CommandContext {
 
     static String readFromStandardInput() {
         System.in.withReader {
-            readLine()
+            it.readLine()
         }
     }
 }

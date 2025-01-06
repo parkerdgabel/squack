@@ -11,6 +11,7 @@ version = '0.0.1-SNAPSHOT'
 java {
     toolchain {
         languageVersion = JavaLanguageVersion.of(17)
+        vendor = JvmVendorSpec.GRAAL_VM
     }
 }
 
@@ -25,16 +26,18 @@ graalvmNative {
         main {
             javaLauncher = javaToolchains.launcherFor {
                 languageVersion = JavaLanguageVersion.of(17)
-                vendor = JvmVendorSpec.matching("GraalVM")
+                vendor = JvmVendorSpec.GRAAL_VM
             }
             richOutput = true
             mainClass = 'com.squacklabs.squawk.SquawkApplication'
             buildArgs.addAll(
-//                    '-H:IncludeSBOM=cyclonedx',
+                    '-H:+ReportExceptionStackTraces',
+                    '--trace-class-initialization=java.lang.management.ManagementFactory$PlatformMBeanFinder,java.io.FilePermission,java.lang.management.ManagementFactory',
                     '--report-unsupported-elements-at-runtime',
-//                    '--initialize-at-run-time=groovy.grape.GrapeIvy,org.h2.store.fs.niomem.FileNioMemData',
-                    '--initialize-at-build-time',
-                    '--no-fallback',
+//                    '--initialize-at-build-time=java.io.FilePermission',
+//                    '--initialize-at-build-time=org.codehaus.groovy,org.apache.groovy,groovy,com.sun.beans',
+                    '--initialize-at-run-time=java.rmi.server.ObjID,com.squacklabs.squawk.DatasourceConfig,org.komamitsu.spring.data.sqlite.SqliteJdbcConfiguration,org.springframework.core.io.VfsUtils',
+                    '--no-fallback'
             )
         }
     }

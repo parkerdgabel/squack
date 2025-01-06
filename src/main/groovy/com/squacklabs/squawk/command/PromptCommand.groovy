@@ -38,7 +38,10 @@ class PromptCommand implements Command{
         }
 
         if (context.args.containsOption("option") || context.args.containsOption("o")) {
-            context.options = context.args.getOptionValues("option")
+            def options = context.args.getOptionValues "option" collate 2
+            options.each { key, value ->
+                context.options[key as String] = value as String
+            }
         }
 
         if (context.args.containsOption("attachment") || context.args.containsOption("a")) {

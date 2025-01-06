@@ -2,24 +2,26 @@ package com.squacklabs.squawk
 
 import com.squacklabs.squawk.command.Command
 import com.squacklabs.squawk.command.CommandContext
+import com.squacklabs.squawk.command.CommandResult
 import groovy.transform.CompileStatic
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.stereotype.Component
 
 import javax.inject.Inject
+import javax.inject.Named
 
 @CompileStatic
 @Component
 class CliApp implements ApplicationRunner {
 
     private final Squack squack
-    private final List<Command> commands
+    private final Command mainCommand
 
     @Inject
-    CliApp(Squack squack, List<Command> commands) {
+    CliApp(Squack squack, @Named Command mainCommand) {
         this.squack = squack
-        this.commands = commands
+        this.mainCommand = mainCommand
     }
 
     private static final String helpMessage = """
@@ -35,25 +37,20 @@ Options:
 
     @Override
     void run(ApplicationArguments args) throws Exception {
-        if (args.containsOption "help") {
+        if (args.containsOption("help") || args.sourceArgs.length == 0) {
             println helpMessage
-        } else if (args.containsOption "name") {
-            String name = args.getOptionValues("name").get(0)
-            println "Hello, ${name}!"
-        } else {
-            println "No valid options provided. Use --help for usage information."
+            return
+        }
+
+        CommandContext context = executeCommand(args)
+        if (context.result == CommandResult.FAILURE) {
+            println "Error: ${context.result.errorMessage}"
         }
     }
 
     private CommandContext executeCommand(ApplicationArguments args) {
-        CommandContext context = new CommandContext()
-        String commandName = args.getNonOptionArgs().get(0)
-        Command command = commands.find { it.getName() == commandName }
-        if (command) {
-            command.execute(context)
-        } else {
-            println "Command not found: ${commandName}"
-        }
-        return context
+        CommandContext context = new CommandContext(args)
+        mainCommand.execute(context)
+        context
     }
 }

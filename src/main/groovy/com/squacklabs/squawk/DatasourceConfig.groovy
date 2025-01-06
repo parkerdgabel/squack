@@ -2,6 +2,8 @@ package com.squacklabs.squawk
 
 import groovy.transform.CompileStatic
 import jakarta.annotation.PostConstruct
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.jdbc.DataSourceBuilder
 import org.springframework.context.annotation.Bean
@@ -22,6 +24,8 @@ import java.sql.Statement
 @CompileStatic
 @Configuration
 class DatasourceConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(DatasourceConfig)
 
     @Value('${spring.datasource.url}')
     private String datasourceUrl
